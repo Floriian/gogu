@@ -31,7 +31,7 @@ export class AuthService {
           hash: salt,
         },
       });
-      return user;
+      return this.signToken(user.id, user.email, user.username);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -56,8 +56,6 @@ export class AuthService {
     });
     if (!user) throw new ForbiddenException('User not found!');
     const hashedDto = await md5(dto.password);
-
-    console.log({ hashedDto, user: user.hash });
 
     if (hashedDto == user.hash) {
       return this.signToken(user.id, user.email, user.username);
