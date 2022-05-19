@@ -5,9 +5,12 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
-import { PostService } from './post/post.service';
 @Module({
-  imports: [PrismaModule, ConfigModule.forRoot({ isGlobal: true }), AuthModule, PostsModule],
-  providers: [PostService],
+  imports: [
+    PrismaModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    PostsModule,
+  ],
 })
 export class AppModule {}

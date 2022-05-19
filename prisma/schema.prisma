@@ -24,16 +24,17 @@ model User {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   title     String
   body      String
   userId    Int
-  commentId Int
-  Comment   Comment  @relation(fields: [commentId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  // commentId Int?
+  // Comment   Comment? @relation(fields: [commentId], references: [id])
+  comments  Comment[]
 
+  User User @relation(fields: [userId], references: [id])
   @@map("posts")
 }
 
