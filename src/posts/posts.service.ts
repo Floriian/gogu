@@ -83,7 +83,7 @@ export class PostsService {
           title: dto.title,
         },
       });
-      return 'Successfully updatet post!';
+      return 'Successfully updated post!';
     } catch (error) {
       //P2025 in console, if not handling this error.
       if (error instanceof PrismaClientKnownRequestError) {
