@@ -30,9 +30,7 @@ model Post {
   title     String
   body      String
   userId    Int
-  // commentId Int?
-  // Comment   Comment? @relation(fields: [commentId], references: [id])
-  comments  Comment[]
+  comment   Comment[]
 
   User User @relation(fields: [userId], references: [id])
   @@map("posts")

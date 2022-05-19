@@ -1,8 +1,8 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Post, User } from '@prisma/client';
+import { Post, User, Comment } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { createPostDto, getOnePostDto } from './dto';
+import { createPostDto } from './dto';
 
 @Injectable()
 export class PostsService {
@@ -19,6 +19,10 @@ export class PostsService {
       const post = await this.prisma.post.findUnique({
         where: {
           id: _id,
+        },
+        include: {
+          comment: true,
+          User: true,
         },
       });
       return post;
@@ -50,8 +54,9 @@ export class PostsService {
           id: _id,
         },
       });
+      return 'Successfully deleted post!';
     } catch (error) {
-      //P2025
+      //P2025 in console, if not handling this error.
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new ForbiddenException("This post doesn't exists!");
