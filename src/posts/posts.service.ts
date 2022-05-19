@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Post, User, Comment } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { createPostDto } from './dto';
+import { createPostDto, updatePostDto } from './dto';
 
 @Injectable()
 export class PostsService {
@@ -22,7 +22,11 @@ export class PostsService {
         },
         include: {
           comment: true,
-          User: true,
+          User: {
+            select: {
+              username: true,
+            },
+          },
         },
       });
       return post;
@@ -63,6 +67,24 @@ export class PostsService {
         }
         throw error;
       }
+    }
+  }
+
+  async updatePost(id: string, dto: updatePostDto) {
+    const _id = parseInt(id);
+    try {
+      const post = await this.prisma.post.update({
+        where: {
+          id: _id,
+        },
+        data: {
+          body: dto.body,
+          title: dto.title,
+        },
+      });
+      return 'Successfully updatet post!';
+    } catch (error) {
+      console.log(error);
     }
   }
 }
