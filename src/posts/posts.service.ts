@@ -29,7 +29,8 @@ export class PostsService {
           },
         },
       });
-      return post;
+      if (post) return post;
+      if (!post) return new ForbiddenException('This post is not exists!');
     } catch (error) {
       console.log(error);
     }
@@ -84,7 +85,13 @@ export class PostsService {
       });
       return 'Successfully updatet post!';
     } catch (error) {
-      console.log(error);
+      //P2025 in console, if not handling this error.
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new ForbiddenException("This post doesn't exists!");
+        }
+        throw error;
+      }
     }
   }
 }
