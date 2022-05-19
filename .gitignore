@@ -1,4 +1,5 @@
 # compiled output
+/prisma/migrations
 /dist
 /node_modules
 
