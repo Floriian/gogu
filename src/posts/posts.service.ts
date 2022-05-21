@@ -30,7 +30,7 @@ export class PostsService {
         },
       });
       if (post) return post;
-      if (!post) return new ForbiddenException('This post is not exists!');
+      if (!post) return new ForbiddenException('This post is not exists');
     } catch (error) {
       console.log(error);
     }
