@@ -1,6 +1,13 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Post, User, Comment } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createPostDto, updatePostDto } from './dto';
 
@@ -30,9 +37,12 @@ export class PostsService {
         },
       });
       if (post) return post;
-      if (!post) return new ForbiddenException('This post is not exists');
+      if (!post) return new NotFoundException('This post is not exists');
     } catch (error) {
-      console.log(error);
+      if (error instanceof PrismaClientValidationError) {
+        throw new ForbiddenException('Invalid post id');
+      }
+      throw error;
     }
   }
 
