@@ -1,5 +1,6 @@
 import {
   Body,
+  Put,
   Controller,
   Delete,
   Get,
@@ -11,7 +12,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import { JwtGuard } from 'src/auth/guard';
 import { CommentsService } from './comments.service';
-import { createCommentDto } from './dto';
+import { createCommentDto, updateCommentDto } from './dto';
 
 @Controller('comments')
 export class CommentsController {
@@ -37,5 +38,15 @@ export class CommentsController {
   @Delete(':id')
   deleteComment(@Param('id') id: string, @GetUser() user: User) {
     return this.commentService.deleteComment(id, user);
+  }
+
+  @UseGuards(JwtGuard)
+  @Put(':id')
+  updateComment(
+    @Param('id') id: string,
+    @Body() dto: updateCommentDto,
+    @GetUser() user: User,
+  ) {
+    return this.commentService.updateComment(id, dto, user);
   }
 }

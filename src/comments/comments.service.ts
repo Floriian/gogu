@@ -2,12 +2,15 @@ import {
   ForbiddenException,
   NotFoundException,
   Injectable,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Comment, Post, User } from '@prisma/client';
 import { PrismaClientValidationError } from '@prisma/client/runtime';
 import { GetUser } from 'src/auth/decorator';
+import { OkException } from 'src/exceptions';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { createCommentDto } from './dto';
+import { createCommentDto, updateCommentDto } from './dto';
 
 @Injectable()
 export class CommentsService {
@@ -28,7 +31,7 @@ export class CommentsService {
       if (comment.length > 0) {
         return comment;
       } else {
-        return new ForbiddenException('This post is not exists');
+        return new ForbiddenException('This comment is not exists');
       }
     } catch (err) {
       if (err instanceof PrismaClientValidationError) {
@@ -116,4 +119,41 @@ export class CommentsService {
       console.log(error);
     }
   }
+
+  async updateComment(id: string, dto: updateCommentDto, user: User) {
+    const _id = parseInt(id);
+    try {
+      const update = await this.prisma.comment.findMany({
+        where: {
+          id: _id,
+          userId: user.id,
+        },
+      });
+      if (update.length > 0) {
+        return new OkException('Successfully updated!');
+      } else {
+        return new ForbiddenException('Could not update the comment!');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // async updateCommentDb(id: number, dto: updateCommentDto) {
+  //   try {
+  //     const update = await this.prisma.comment.update({
+  //       where: {
+  //         id: id,
+  //       },
+  //       data: {
+  //         body: dto.body,
+  //         title: dto.title ? dto.title : undefined,
+  //       },
+  //     });
+  //     if (update) return 'Successfully updated comment!';
+  //     if (!update) return new ForbiddenException('Server error!');
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 }
