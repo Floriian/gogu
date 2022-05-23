@@ -3,7 +3,7 @@ import {
   NotFoundException,
   Injectable,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Comment, Post, User } from '@prisma/client';
 import { PrismaClientValidationError } from '@prisma/client/runtime';
 import { GetUser } from 'src/auth/decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -77,7 +77,7 @@ export class CommentsService {
       throw error;
     }
   }
-
+  //TODO delete comment response
   async deleteComment(id: string, user: User) {
     const _id = parseInt(id);
     try {
@@ -85,19 +85,33 @@ export class CommentsService {
         where: {
           username: user.username,
         },
-      });
-
-      const comment = await this.prisma.comment.delete({
-        where: {
-          id: _id,
+        include: {
+          comments: true,
         },
       });
 
-      if (comment.userId == findUser.id) {
-        return 'Sikeres törlés!';
-      } else {
-        return new ForbiddenException();
-      }
+      findUser.comments.map((comment: Comment) => {
+        if (comment.id === _id) {
+          return this.deleteCommentFromDb(_id);
+        } else {
+          return new ForbiddenException(
+            'This user is not allowed to delete comment!',
+          );
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async deleteCommentFromDb(id: number) {
+    try {
+      const del = await this.prisma.comment.delete({
+        where: {
+          id,
+        },
+      });
+      return 'Successfully deleted';
     } catch (error) {
       console.log(error);
     }
