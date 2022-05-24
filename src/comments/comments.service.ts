@@ -4,6 +4,7 @@ import {
   Injectable,
   HttpException,
   HttpStatus,
+  NotAcceptableException,
 } from '@nestjs/common';
 import { Comment, Post, User } from '@prisma/client';
 import { PrismaClientValidationError } from '@prisma/client/runtime';
@@ -83,77 +84,59 @@ export class CommentsService {
   //TODO delete comment response
   async deleteComment(id: string, user: User) {
     const _id = parseInt(id);
+    if (Number.isNaN(_id)) return new NotAcceptableException();
     try {
-      const findUser = await this.prisma.user.findUnique({
+      const deleteComment = await this.prisma.comment.deleteMany({
         where: {
-          username: user.username,
-        },
-        include: {
-          comments: true,
-        },
-      });
-
-      findUser.comments.map((comment: Comment) => {
-        if (comment.id === _id) {
-          return this.deleteCommentFromDb(_id);
-        } else {
-          return new ForbiddenException(
-            'This user is not allowed to delete comment!',
-          );
-        }
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async deleteCommentFromDb(id: number) {
-    try {
-      const del = await this.prisma.comment.delete({
-        where: {
-          id,
+          AND: {
+            id: {
+              equals: _id,
+            },
+            userId: {
+              equals: user.id,
+            },
+          },
         },
       });
-      return 'Successfully deleted';
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async updateComment(id: string, dto: updateCommentDto, user: User) {
-    const _id = parseInt(id);
-    try {
-      const update = await this.prisma.comment.findMany({
-        where: {
-          id: _id,
-          userId: user.id,
-        },
-      });
-      if (update.length > 0) {
-        return new OkException('Successfully updated!');
+      if (deleteComment.count > 0) {
+        return new OkException('Successfully deleted comment');
       } else {
-        return new ForbiddenException('Could not update the comment!');
+        return new ForbiddenException("Couldn't delete this comment");
       }
     } catch (error) {
       console.log(error);
     }
   }
-
-  // async updateCommentDb(id: number, dto: updateCommentDto) {
-  //   try {
-  //     const update = await this.prisma.comment.update({
-  //       where: {
-  //         id: id,
-  //       },
-  //       data: {
-  //         body: dto.body,
-  //         title: dto.title ? dto.title : undefined,
-  //       },
-  //     });
-  //     if (update) return 'Successfully updated comment!';
-  //     if (!update) return new ForbiddenException('Server error!');
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
+  async updateComment(id: string, dto: updateCommentDto, user: User) {
+    const _id = parseInt(id);
+    if (Number.isNaN(_id)) return new NotAcceptableException();
+    try {
+      const update = await this.prisma.comment.updateMany({
+        where: {
+          AND: [
+            {
+              id: {
+                equals: _id,
+              },
+              userId: {
+                equals: user.id,
+              },
+            },
+          ],
+        },
+        data: {
+          body: dto.body,
+          title: dto.title ? dto.title : null,
+        },
+      });
+      if (update.count > 0) {
+        return new OkException('Successfully updated comment!');
+      } else if (update.count <= 0) {
+        return new ForbiddenException("Couldn't update this comment!");
+      }
+    } catch (error) {
+      //P2025 error handling
+      console.log(error);
+    }
+  }
 }
