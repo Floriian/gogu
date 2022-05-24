@@ -8,6 +8,9 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from '@prisma/client/runtime';
+import { userInfo } from 'os';
+import { use } from 'passport';
+import { OkException } from 'src/exceptions';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createPostDto, updatePostDto } from './dto';
 
@@ -61,15 +64,28 @@ export class PostsService {
     }
   }
 
-  async deletePost(id: string) {
+  async deletePost(id: string, user: User) {
     const _id = parseInt(id);
     try {
-      const post = await this.prisma.post.delete({
+      const post = await this.prisma.post.deleteMany({
         where: {
-          id: _id,
+          AND: [
+            {
+              id: {
+                equals: _id,
+              },
+              userId: {
+                equals: user.id,
+              },
+            },
+          ],
         },
       });
-      return 'Successfully deleted post!';
+      if (post.count > 0) {
+        return new OkException('Successfully deleted post!');
+      } else if (post.count <= 0) {
+        return new ForbiddenException("Couldn't deleted this post!");
+      }
     } catch (error) {
       //P2025 in console, if not handling this error.
       if (error instanceof PrismaClientKnownRequestError) {
@@ -81,19 +97,32 @@ export class PostsService {
     }
   }
 
-  async updatePost(id: string, dto: updatePostDto) {
+  async updatePost(id: string, dto: updatePostDto, user: User) {
     const _id = parseInt(id);
     try {
-      const post = await this.prisma.post.update({
+      const post = await this.prisma.post.updateMany({
         where: {
-          id: _id,
+          AND: [
+            {
+              id: {
+                equals: _id,
+              },
+              userId: {
+                equals: user.id,
+              },
+            },
+          ],
         },
         data: {
           body: dto.body,
           title: dto.title,
         },
       });
-      return 'Successfully updated post!';
+      if (post.count > 0) {
+        return new OkException('Successfully updated post!');
+      } else if (post.count <= 0) {
+        return new ForbiddenException("Couldn't update this post!");
+      }
     } catch (error) {
       //P2025 in console, if not handling this error.
       if (error instanceof PrismaClientKnownRequestError) {

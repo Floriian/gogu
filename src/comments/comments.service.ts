@@ -81,7 +81,6 @@ export class CommentsService {
       throw error;
     }
   }
-  //TODO delete comment response
   async deleteComment(id: string, user: User) {
     const _id = parseInt(id);
     if (Number.isNaN(_id)) return new NotAcceptableException();

@@ -36,13 +36,17 @@ export class PostsController {
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  deletePost(@Param('id') id: string) {
-    return this.postService.deletePost(id);
+  deletePost(@Param('id') id: string, @GetUser() user: User) {
+    return this.postService.deletePost(id, user);
   }
 
   @UseGuards(JwtGuard)
   @Put(':id')
-  updatePost(@Param('id') id: string, @Body() updatePostDto: updatePostDto) {
-    return this.postService.updatePost(id, updatePostDto);
+  updatePost(
+    @Param('id') id: string,
+    @Body() updatePostDto: updatePostDto,
+    @GetUser() user: User,
+  ) {
+    return this.postService.updatePost(id, updatePostDto, user);
   }
 }
