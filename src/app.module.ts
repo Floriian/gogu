@@ -5,6 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { AdminModule } from './admin/admin.module';
+import { RouterModule } from '@nestjs/core';
+import { AdminCommentsModule } from './admin/comments/comments.module';
 @Module({
   imports: [
     PrismaModule,
@@ -12,7 +14,22 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     PostsModule,
     CommentsModule,
+    //AdminModule
     AdminModule,
+    AdminCommentsModule,
+    RouterModule.register([
+      {
+        path: 'admin',
+        module: AdminModule,
+        children: [
+          {
+            path: 'comments',
+            module: AdminCommentsModule,
+          },
+        ],
+      },
+    ]),
+    //End of AdminModule
   ],
 })
 export class AppModule {}

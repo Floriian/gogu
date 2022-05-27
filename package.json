@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start:db": "docker compose up dev-db -d",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -22,12 +22,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^8.0.0",
+    "@nestjs/common": "^8.4.5",
     "@nestjs/config": "^2.0.1",
-    "@nestjs/core": "^8.0.0",
-    "@nestjs/jwt": "^8.0.0",
+    "@nestjs/core": "^8.4.5",
+    "@nestjs/jwt": "^8.0.1",
     "@nestjs/passport": "^8.2.1",
-    "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/platform-express": "^8.4.5",
     "@nestjs/swagger": "^5.2.1",
     "@prisma/client": "^3.14.0",
     "@types/bcrypt": "^5.0.0",
@@ -75,7 +75,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -83,7 +83,14 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/admin(|/.*)$": "<rootDir>/libs/admin/src/$1"
+    }
   }
 }
