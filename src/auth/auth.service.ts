@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Response } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto, RegisterDto } from './dto';
 import * as md5 from 'md5';
@@ -70,11 +70,7 @@ export class AuthService {
     // return this.signToken(user.id, user.email, user.username);
   }
 
-  async signToken(
-    userId: number,
-    email: string,
-    username: string,
-  ): Promise<{ access_token: string }> {
+  async signToken(userId: number, email: string, username: string) {
     const payload = {
       sub: userId,
       email,
@@ -87,9 +83,6 @@ export class AuthService {
       expiresIn: '15m',
       secret: secret,
     });
-
-    return {
-      access_token: token,
-    };
+    return token;
   }
 }
